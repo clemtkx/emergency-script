@@ -1,0 +1,103 @@
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import ttk
+import threading
+from testemergency import run_emergency_script
+
+def update_progress(step):
+    # Safely update the progress bar from any thread
+    app.after(0, lambda: progress_bar.configure(value=step))
+    # Also update the status label
+    app.after(0, lambda: status_label.configure(text=f"Step {step} of 22 completed"))
+
+def run_script():
+    # Reset progress bar to 0 at start
+    progress_bar.configure(value=0)
+    status_label.configure(text="Starting automation...")
+    
+    gender = gender_var.get()
+    forename = forename_entry.get()
+    surname = surname_entry.get()
+    dob_day = day_entry.get()
+    dob_month = month_entry.get()
+    dob_year = year_entry.get()
+    home_postcode = postcode_entry.get()
+
+    # Simple validation
+    if not (gender and forename and surname and dob_day and dob_month and dob_year and home_postcode):
+        messagebox.showerror("Input Error", "Please fill in every field.")
+        return
+
+    # Disable the button during execution
+    run_button.configure(state='disabled', text="Running...")
+
+    # Run the automation in a separate thread so the GUI remains responsive.
+    threading.Thread(
+        target=run_emergency, 
+        args=(gender, forename, surname, dob_day, dob_month, dob_year, home_postcode),
+        daemon=True
+    ).start()
+
+def run_emergency(gender, forename, surname, dob_day, dob_month, dob_year, home_postcode):
+    try:
+        # Run the automation script
+        run_emergency_script(gender, forename, surname, dob_day, dob_month, dob_year, home_postcode, progress_callback=update_progress)
+        
+        # Success - update GUI safely from thread
+        app.after(0, lambda: status_label.configure(text="Automation completed successfully!"))
+        app.after(0, lambda: messagebox.showinfo("Success", "Emergency prescription request completed."))
+        
+    except Exception as e:
+        # Error - update GUI safely from thread
+        app.after(0, lambda: status_label.configure(text=f"Error: {str(e)}"))
+        app.after(0, lambda: messagebox.showerror("Error", f"Automation failed:\n\n{str(e)}"))
+        
+    finally:
+        # Re-enable the button
+        app.after(0, lambda: run_button.configure(state='normal', text="Start Emergency Prescription Request"))
+
+app = tk.Tk()
+app.title("NHS Emergency Prescription Tool")
+app.geometry("400x350")
+
+tk.Label(app, text="Gender (Male/Female):").grid(row=0, column=0, sticky="e", padx=5, pady=2)
+gender_var = tk.StringVar(value="male")
+gender_entry = tk.Entry(app, textvariable=gender_var)
+gender_entry.grid(row=0, column=1, padx=5, pady=2)
+
+tk.Label(app, text="Forename:").grid(row=1, column=0, sticky="e", padx=5, pady=2)
+forename_entry = tk.Entry(app)
+forename_entry.grid(row=1, column=1, padx=5, pady=2)
+
+tk.Label(app, text="Surname:").grid(row=2, column=0, sticky="e", padx=5, pady=2)
+surname_entry = tk.Entry(app)
+surname_entry.grid(row=2, column=1, padx=5, pady=2)
+
+tk.Label(app, text="DOB Day:").grid(row=3, column=0, sticky="e", padx=5, pady=2)
+day_entry = tk.Entry(app)
+day_entry.grid(row=3, column=1, padx=5, pady=2)
+
+tk.Label(app, text="DOB Month:").grid(row=4, column=0, sticky="e", padx=5, pady=2)
+month_entry = tk.Entry(app)
+month_entry.grid(row=4, column=1, padx=5, pady=2)
+
+tk.Label(app, text="DOB Year:").grid(row=5, column=0, sticky="e", padx=5, pady=2)
+year_entry = tk.Entry(app)
+year_entry.grid(row=5, column=1, padx=5, pady=2)
+
+tk.Label(app, text="Home Postcode:").grid(row=6, column=0, sticky="e", padx=5, pady=2)
+postcode_entry = tk.Entry(app)
+postcode_entry.grid(row=6, column=1, padx=5, pady=2)
+
+# Create a determinate progress bar for steps 3-22 (20 total steps)
+progress_bar = ttk.Progressbar(app, mode='determinate', maximum=20)
+progress_bar.grid(row=7, column=0, columnspan=2, sticky="ew", pady=10, padx=10)
+
+# Add status label
+status_label = tk.Label(app, text="Ready to start", fg="blue")
+status_label.grid(row=8, column=0, columnspan=2, pady=5)
+
+run_button = tk.Button(app, text="Start Emergency Prescription Request", command=run_script)
+run_button.grid(row=9, column=0, columnspan=2, pady=10)
+
+app.mainloop()
