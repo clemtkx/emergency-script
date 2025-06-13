@@ -3,223 +3,731 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, WebDriverException, ElementClickInterceptedException
 import time
 
 # Step 1: Open browser and go to NHS 111 triage start page
 def step_1():
     chrome_options = Options()
-    # Do not minimize for debugging; keep browser visible
     driver = webdriver.Chrome(options=chrome_options)
     driver.get("https://111.nhs.uk/Location/TriageStart")
+    
+    # Minimize the window after initial page load
+    try:
+        driver.minimize_window()
+    except Exception:
+        pass  # Some platforms may not support minimization
+    
     print("Step 1 completed: Browser opened and navigated to triage start page.")
     return driver
 
-# Utility for robust click/send_keys with staleness retry
-def robust_action(driver, by, selector, action, value=None):
-    for attempt in range(3):
-        try:
-            elem = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((by, selector))
-            )
-            if action == 'click':
-                elem.click()
-            elif action == 'send_keys' and value is not None:
-                elem.clear()
-                elem.send_keys(value)
-            return
-        except StaleElementReferenceException:
-            if attempt == 2:
-                raise
-            continue
-
-def wait_between_steps():
-    pass  # No wait needed now
-
 # Step 2: Fill in postcode and click Next
 def step_2(driver):
-    robust_action(driver, By.CSS_SELECTOR, "input[data-test-id='postcode-input']", 'send_keys', 'PL53PY')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Fill postcode with retry logic
+    for attempt in range(3):
+        try:
+            postcode_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[data-test-id='postcode-input']")))
+            postcode_input.clear()
+            postcode_input.send_keys('PL53PY')
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 2 completed: Postcode entered and Next button clicked.")
-    wait_between_steps()
 
 # Step 3: Fill in age and click Next
 def step_3(driver):
-    robust_action(driver, By.CSS_SELECTOR, "input[data-test-id='age-input']", 'send_keys', '34')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Fill age with retry logic
+    for attempt in range(3):
+        try:
+            age_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[data-test-id='age-input']")))
+            age_input.clear()
+            age_input.send_keys('34')
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 3 completed: Age entered and Next button clicked.")
-    wait_between_steps()
 
 # Step 4: Select Female and click Next
 def step_4(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='Female-label']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click Female label with retry logic
+    for attempt in range(3):
+        try:
+            female_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='Female-label']")))
+            female_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 4 completed: Selected 'Female' and clicked Next.")
-    wait_between_steps()
 
 # Step 5: Click 'Head, face and neck' link
 def step_5(driver):
-    robust_action(driver, By.CSS_SELECTOR, "a[data-title='Head, face and neck']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click category link with retry logic
+    for attempt in range(3):
+        try:
+            category_link = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a[data-title='Head, face and neck']")))
+            category_link.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 5 completed: Clicked 'Head, face and neck' category link.")
-    wait_between_steps()
 
 # Step 6: Click 'Fluid or wax coming from the ear with no loss of hearing' link
 def step_6(driver):
-    robust_action(driver, By.CSS_SELECTOR, "a[data-title='Fluid or wax coming from the ear with no loss of hearing']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click pathway link with retry logic
+    for attempt in range(3):
+        try:
+            pathway_link = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a[data-title='Fluid or wax coming from the ear with no loss of hearing']")))
+            pathway_link.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 6 completed: Clicked 'Fluid or wax coming from the ear with no loss of hearing' link.")
-    wait_between_steps()
 
 # Step 7: Click 'I understand' button
 def step_7(driver):
-    robust_action(driver, By.ID, "nextScreen", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click I understand button with retry logic
+    for attempt in range(3):
+        try:
+            understand_button = wait.until(EC.element_to_be_clickable((By.ID, "nextScreen")))
+            understand_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 7 completed: Clicked 'I understand' button.")
-    wait_between_steps()
 
 # Step 8: Click 'No' (answer 1) label and Next button
 def step_8(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='answer-1']", 'click')
-    time.sleep(1)
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click answer label with retry logic
+    for attempt in range(3):
+        try:
+            answer_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='answer-1']")))
+            answer_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    time.sleep(1)  # Brief pause as in original
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 8 completed: Clicked 'No' (answer 1) label and Next button.")
-    wait_between_steps()
 
 # Step 9: Click 'No' (answer 2) label and Next button
 def step_9(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='answer-2']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click answer label with retry logic
+    for attempt in range(3):
+        try:
+            answer_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='answer-2']")))
+            answer_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 9 completed: Clicked 'No' (answer 2) label and Next button.")
-    wait_between_steps()
 
 # Step 10: Click 'I'm not sure' (answer 1) label and Next button
 def step_10(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='answer-1']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click answer label with retry logic
+    for attempt in range(3):
+        try:
+            answer_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='answer-1']")))
+            answer_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 10 completed: Clicked 'I'm not sure' (answer 1) label and Next button.")
-    wait_between_steps()
 
 # Step 11: Click 'No - I feel well enough to do most of my usual daily activities' (answer 2) label and Next button
 def step_11(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='answer-2']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click answer label with retry logic
+    for attempt in range(3):
+        try:
+            answer_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='answer-2']")))
+            answer_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 11 completed: Clicked 'No - I feel well enough to do most of my usual daily activities' (answer 2) label and Next button.")
-    wait_between_steps()
 
 # Step 12: Click 'No' (answer 2) label and Next button
 def step_12(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='answer-2']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click answer label with retry logic
+    for attempt in range(3):
+        try:
+            answer_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='answer-2']")))
+            answer_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 12 completed: Clicked 'No' (answer 2) label and Next button.")
-    wait_between_steps()
 
 # Step 13: Click 'No' (answer 2) label and Next button
 def step_13(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='answer-2']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
-    print("Step 13 completed: Clicked 'No' (answer 2) label and Next button. Browser left open for user review.")
-    wait_between_steps()
+    wait = WebDriverWait(driver, 10)
+    
+    # Click answer label with retry logic
+    for attempt in range(3):
+        try:
+            answer_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='answer-2']")))
+            answer_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    print("Step 13 completed: Clicked 'No' (answer 2) label and Next button.")
 
 def step_14(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='answer-2']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click answer label with retry logic
+    for attempt in range(3):
+        try:
+            answer_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='answer-2']")))
+            answer_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 14 completed: Clicked 'No' (answer 2) label and Next button.")
-    wait_between_steps()
 
 def step_15(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='answer-3']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click answer label with retry logic
+    for attempt in range(3):
+        try:
+            answer_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='answer-3']")))
+            answer_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 15 completed: Clicked 'No' (answer 3) label and Next button.")
-    wait_between_steps()
 
 def step_16(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='answer-2']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click answer label with retry logic
+    for attempt in range(3):
+        try:
+            answer_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='answer-2']")))
+            answer_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 16 completed: Clicked 'No' (answer 2) label and Next button.")
-    wait_between_steps()
 
 def step_17(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='answer-2']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click answer label with retry logic
+    for attempt in range(3):
+        try:
+            answer_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='answer-2']")))
+            answer_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 17 completed: Clicked 'No' (answer 2) label and Next button.")
-    wait_between_steps()
 
 # Step 18: Click 'Refer me to a pharmacist' link
 def step_18(driver):
-    robust_action(driver, By.CSS_SELECTOR, "span[data-test-id='action-link-text']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click pharmacist referral link with retry logic
+    for attempt in range(3):
+        try:
+            referral_link = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "span[data-test-id='action-link-text']")))
+            referral_link.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 18 completed: Clicked 'Refer me to a pharmacist' link.")
-    wait_between_steps()
 
 # Step 19: Click 'Honicknowle Pharmacy' button
 def step_19(driver):
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='start-referral']", 'click')
-    print("Step 19 completed: Clicked 'Honicknowle Pharmacy' button. Automation finished, browser left open for review.")
-    wait_between_steps()
+    wait = WebDriverWait(driver, 10)
+    
+    # Click pharmacy button with retry logic
+    for attempt in range(3):
+        try:
+            pharmacy_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='start-referral']")))
+            pharmacy_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    print("Step 19 completed: Clicked 'Honicknowle Pharmacy' button.")
 
 def step_20(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='informant-type-self-label']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click informant type label with retry logic
+    for attempt in range(3):
+        try:
+            informant_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='informant-type-self-label']")))
+            informant_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 20 completed: Clicked 'Me' label and Next button.")
-    wait_between_steps()
 
 def step_21(driver):
-    robust_action(driver, By.CSS_SELECTOR, "input[data-test-id='patient-forename-input']", 'send_keys', 'clement')
-    robust_action(driver, By.CSS_SELECTOR, "input[data-test-id='patient-surname-input']", 'send_keys', 'tan')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Fill forename with retry logic
+    for attempt in range(3):
+        try:
+            forename_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[data-test-id='patient-forename-input']")))
+            forename_input.clear()
+            forename_input.send_keys('clement')
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Fill surname with retry logic
+    for attempt in range(3):
+        try:
+            surname_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[data-test-id='patient-surname-input']")))
+            surname_input.clear()
+            surname_input.send_keys('tan')
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 21 completed: Entered forename and surname, then clicked Next button.")
-    wait_between_steps()
 
 def step_22(driver):
-    robust_action(driver, By.CSS_SELECTOR, "input[data-test-id='dob-day-input']", 'send_keys', '14')
-    robust_action(driver, By.CSS_SELECTOR, "input[data-test-id='dob-month-input']", 'send_keys', '5')
-    robust_action(driver, By.CSS_SELECTOR, "input[data-test-id='dob-year-input']", 'send_keys', '1991')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Fill day with retry logic
+    for attempt in range(3):
+        try:
+            day_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[data-test-id='dob-day-input']")))
+            day_input.clear()
+            day_input.send_keys('14')
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Fill month with retry logic
+    for attempt in range(3):
+        try:
+            month_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[data-test-id='dob-month-input']")))
+            month_input.clear()
+            month_input.send_keys('5')
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Fill year with retry logic
+    for attempt in range(3):
+        try:
+            year_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[data-test-id='dob-year-input']")))
+            year_input.clear()
+            year_input.send_keys('1991')
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 22 completed: Entered DOB and clicked Next button.")
-    wait_between_steps()
 
 def step_23(driver):
-    robust_action(driver, By.CSS_SELECTOR, "input[data-test-id='telephonenumber-input']", 'send_keys', '01752773335')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Fill telephone with retry logic
+    for attempt in range(3):
+        try:
+            phone_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[data-test-id='telephonenumber-input']")))
+            phone_input.clear()
+            phone_input.send_keys('01752773335')
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 23 completed: Entered telephone number and clicked Next button.")
-    wait_between_steps()
 
 def step_24(driver):
+    wait = WebDriverWait(driver, 10)
+    
     # Scroll down slightly before clicking address button
     driver.execute_script("window.scrollBy(0, 200);")
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='address-option-button']", 'click')
+    
+    # Click address button with retry logic
+    for attempt in range(3):
+        try:
+            address_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='address-option-button']")))
+            address_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 24 completed: Clicked address option for Honicknowle Pharmacy.")
-    wait_between_steps()
 
 def step_25(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='home-address-no-label']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click home address label with retry logic
+    for attempt in range(3):
+        try:
+            home_address_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='home-address-no-label']")))
+            home_address_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 25 completed: Clicked 'No' for home address and Next button.")
-    wait_between_steps()
 
 def step_26(driver):
-    robust_action(driver, By.CSS_SELECTOR, "input[data-test-id='home-postcode-input']", 'send_keys', 'ex20ad')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Fill home postcode with retry logic
+    for attempt in range(3):
+        try:
+            postcode_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[data-test-id='home-postcode-input']")))
+            postcode_input.clear()
+            postcode_input.send_keys('ex20ad')
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 26 completed: Entered home postcode and clicked Next button.")
-    wait_between_steps()
 
 def step_27(driver):
-    robust_action(driver, By.CSS_SELECTOR, "label[data-test-id='none-label']", 'click')
-    robust_action(driver, By.CSS_SELECTOR, "button[data-test-id='next-button']", 'click')
+    wait = WebDriverWait(driver, 10)
+    
+    # Click none label with retry logic
+    for attempt in range(3):
+        try:
+            none_label = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[data-test-id='none-label']")))
+            none_label.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
+    # Click Next button with retry logic
+    for attempt in range(3):
+        try:
+            next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-test-id='next-button']")))
+            next_button.click()
+            break
+        except (StaleElementReferenceException, WebDriverException, ElementClickInterceptedException):
+            if attempt == 2:
+                raise
+            time.sleep(0.5)
+    
     print("Step 27 completed: Clicked 'None of these, I'll make a note myself' and Next button.")
-    wait_between_steps()
 
 def step_28(driver):
-    driver.maximize_window()
+    # Maximize the window before final step for user review
+    try:
+        driver.maximize_window()
+    except Exception:
+        pass
+    
     print("Step 28 completed: Browser maximized for user review. Script finished, browser remains open.")
     input("Press Enter to exit and close the browser...")
-
-# Debugging utility to print all radio button labels and their attributes
-def print_radio_button_labels(driver):
-    labels = driver.find_elements(By.CSS_SELECTOR, "label.nhsuk-label.nhsuk-radios__label")
-    for lbl in labels:
-        print(
-            f"Label: for={lbl.get_attribute('for')}, "
-            f"data-test-id={lbl.get_attribute('data-test-id')}, "
-            f"text='{lbl.text.strip()}'"
-        )
+    driver.quit()
 
 if __name__ == "__main__":
     driver = step_1()
@@ -250,6 +758,3 @@ if __name__ == "__main__":
     step_26(driver)
     step_27(driver)
     step_28(driver)
-    print("Automation completed. Browser is open for user review.")
-    input("Press Enter to exit and close the browser...")
-    driver.quit()
